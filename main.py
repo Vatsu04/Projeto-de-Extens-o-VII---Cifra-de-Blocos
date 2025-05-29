@@ -1,11 +1,11 @@
 import random
 import string
-import itertools
+import itertools #Facilita o trabalho com grandes volumes de dados sem precisar armazenar tudo na memória.
 import sys
 
 # Definindo o alfabeto
 chars = (
-    " " + string.punctuation + string.digits + string.ascii_letters 
+    " " + string.punctuation + string.digits + string.ascii_letters + "çáéíóúãõâêîôûäëïöüÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØÙÚÛÜÝÿ"
 )
 chars = list(chars)
 
