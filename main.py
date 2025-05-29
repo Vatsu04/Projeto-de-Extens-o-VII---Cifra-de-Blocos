@@ -1,16 +1,20 @@
 import random
 import string
-import itertools #Facilita o trabalho com grandes volumes de dados sem precisar armazenar tudo na memória.
+import itertools
 import sys
+
+try:
+    from tqdm import tqdm  # Barra de progresso opcional
+except ImportError:
+    tqdm = lambda x, **kwargs: x  # Fallback se não tiver tqdm
 
 # Definindo o alfabeto
 chars = (
-    " " + string.punctuation + string.digits + string.ascii_letters + "çáéíóúãõâêîôûäëïöüÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÑÒÓÔÕÖØÙÚÛÜÝÿ"
+    " " + string.punctuation + string.digits + string.ascii_letters
 )
 chars = list(chars)
 
-# Gerando múltiplos substitutos para cada caractere
-random.seed(42)  # Para reprodução, remova para produção
+random.seed(42)
 all_subs = chars.copy()
 sub_map = {}
 reverse_map = {}
@@ -22,13 +26,11 @@ for c in chars:
         if s not in possible_subs:
             possible_subs.append(s)
     sub_map[c] = possible_subs
-    # Para descriptografia
     for sub in possible_subs:
         if sub not in reverse_map:
             reverse_map[sub] = []
         reverse_map[sub].append(c)
 
-# --- ENCRYPTION ---
 def encrypt(text):
     cipher = ""
     for letter in text:
@@ -38,8 +40,7 @@ def encrypt(text):
             cipher += letter
     return cipher
 
-# --- DECRYPTION (printa todas até achar a correta) ---
-def decrypt_bruteforce(ciphertext, original_word, max_results=10_000_000):
+def decrypt_bruteforce(ciphertext, original_word):
     possible_letters = []
     for c in ciphertext:
         if c in reverse_map:
@@ -52,11 +53,8 @@ def decrypt_bruteforce(ciphertext, original_word, max_results=10_000_000):
         total_combinations *= len(choices)
     print(f"Total de combinações possíveis: {total_combinations}")
 
-    if total_combinations > max_results:
-        print("Muito grande para processar todas as combinações de uma vez. Tente um texto menor.")
-        return
-
-    for idx, candidate in enumerate(itertools.product(*possible_letters)):
+    # Barra de progresso (tqdm) opcional
+    for idx, candidate in enumerate(tqdm(itertools.product(*possible_letters), total=total_combinations, desc="Processando")):
         candidate_str = "".join(candidate)
         print(candidate_str)
         if candidate_str == original_word:
@@ -64,11 +62,10 @@ def decrypt_bruteforce(ciphertext, original_word, max_results=10_000_000):
             sys.exit(0)
     print("Palavra original não encontrada.")
 
-# --- Exemplo de uso ---
 if __name__ == "__main__":
     original_word = input("Digite o texto para encriptar: ")
     cipher_text = encrypt(original_word)
     print(f"Texto encriptado: {cipher_text}")
 
-    print("\nTentando decriptar por força bruta (imprimindo todas as possibilidades):")
+    print("\nTentando decriptar por força bruta (demorado para textos grandes):")
     decrypt_bruteforce(cipher_text, original_word)
