@@ -3,11 +3,6 @@ import string
 import itertools
 import sys
 
-try:
-    from tqdm import tqdm  # Barra de progresso opcional
-except ImportError:
-    tqdm = lambda x, **kwargs: x  # Fallback se não tiver tqdm
-
 # Definindo o alfabeto
 chars = (
     " " + string.punctuation + string.digits + string.ascii_letters
