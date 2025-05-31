@@ -44,14 +44,12 @@ def sbox(byte, key_byte):
     """
     Função S-BOX simples: substituição não linear dependente da chave
     """
-    # Exemplo de S-Box: rotação + XOR + adição
     return ((byte ^ key_byte) + ((byte << 1) | (byte >> 7))) & 0xFF
 
 def sbox_inv(byte, key_byte):
     """
     Inversa da função S-BOX para decriptação
     """
-    # Desfaz a operação do S-Box acima
     tmp = (byte - ((byte << 1) | (byte >> 7))) & 0xFF
     return tmp ^ key_byte
 
@@ -149,15 +147,21 @@ def process_file(input_file, output_file, key, mode="encrypt"):
 if __name__ == "__main__":
     print("=== INN Seguros - Cifra de Blocos 32 bits ===")
     mode = input("Escolha (E)ncriptar ou (D)ecriptar: ").strip().lower()
-    # Entrada sempre na pasta 'Entrada'
-    input_file_name = input("Nome do arquivo de entrada (dentro da pasta Entrada): ").strip()
-    input_file = os.path.join("Entrada", input_file_name)
 
-    # Saída sempre na pasta 'Saída'
-    output_file_name = input("Nome do arquivo de saída (será criado na pasta Saída): ").strip()
-    # Cria a pasta de saída se não existir
-    os.makedirs("Saída", exist_ok=True)
-    output_file = os.path.join("Saída", output_file_name)
+    if mode == "e":
+        # ENCRIPTAR: entrada da pasta Descriptografado, saída na pasta Criptografado
+        input_file_name = input("Nome do arquivo de entrada (dentro da pasta Descriptografado): ").strip()
+        input_file = os.path.join("Descriptografado", input_file_name)
+        output_file_name = input("Nome do arquivo de saída (será criado na pasta Criptografado): ").strip()
+        os.makedirs("Criptografado", exist_ok=True)
+        output_file = os.path.join("Criptografado", output_file_name)
+    else:
+        # DECRIPTAR: entrada da pasta Criptografado, saída na pasta Descriptografado
+        input_file_name = input("Nome do arquivo de entrada (dentro da pasta Criptografado): ").strip()
+        input_file = os.path.join("Criptografado", input_file_name)
+        output_file_name = input("Nome do arquivo de saída (será criado na pasta Descriptografado): ").strip()
+        os.makedirs("Descriptografado", exist_ok=True)
+        output_file = os.path.join("Descriptografado", output_file_name)
     
     while True:
         key_str = input("Chave (8 dígitos hexadecimais, ex: 1a2b3c4d): ").strip()
