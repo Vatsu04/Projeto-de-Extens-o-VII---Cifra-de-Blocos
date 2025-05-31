@@ -109,9 +109,6 @@ def permute_inv(block_int, subkey):
     return out
 
 def encrypt_block(block_bytes, subkeys):
-    """
-    Realiza 3 rodadas de substituição e permutação para encriptar um bloco de 4 bytes
-    """
     block = int.from_bytes(block_bytes, "big")
     for i in range(3):
         block = substitute(block, subkeys[i])
@@ -119,9 +116,6 @@ def encrypt_block(block_bytes, subkeys):
     return block.to_bytes(4, "big")
 
 def decrypt_block(block_bytes, subkeys):
-    """
-    Realiza 3 rodadas de permutação e substituição inversas para decriptar um bloco de 4 bytes
-    """
     block = int.from_bytes(block_bytes, "big")
     for i in reversed(range(3)):
         block = permute_inv(block, subkeys[i])
@@ -141,6 +135,28 @@ def process_file(input_file, output_file, key, mode="encrypt"):
             processed_blocks.append(decrypt_block(block, subkeys))
     write_blocks(output_file, processed_blocks)
 
+def criar_arquivo_interativo(diretorio, nome_arquivo):
+    """
+    Permite ao usuário criar um arquivo texto pelo terminal se ele não existir.
+    """
+    print(f"O arquivo '{nome_arquivo}' não foi encontrado em '{diretorio}'.")
+    escolha = input("Deseja criar este arquivo agora? (S/N): ").strip().lower()
+    if escolha == "s":
+        conteudo = input("Digite o conteúdo do arquivo (tudo em uma linha, ou cole o texto desejado):\n")
+        nome_txt = nome_arquivo
+        # Garante extensão .txt
+        if not nome_txt.lower().endswith('.txt'):
+            nome_txt += ".txt"
+        caminho = os.path.join(diretorio, nome_txt)
+        os.makedirs(diretorio, exist_ok=True)
+        with open(caminho, "w", encoding="utf-8") as f:
+            f.write(conteudo)
+        print(f"Arquivo '{caminho}' criado!")
+        return caminho
+    else:
+        print("Operação cancelada pelo usuário.")
+        sys.exit(1)
+
 # ===============================
 # Interface do Usuário
 # ===============================
@@ -150,18 +166,26 @@ if __name__ == "__main__":
 
     if mode == "e":
         # ENCRIPTAR: entrada da pasta Descriptografado, saída na pasta Criptografado
+        entrada_dir = "Descriptografado"
+        saida_dir = "Criptografado"
         input_file_name = input("Nome do arquivo de entrada (dentro da pasta Descriptografado): ").strip()
-        input_file = os.path.join("Descriptografado", input_file_name)
+        input_file = os.path.join(entrada_dir, input_file_name)
+        if not os.path.isfile(input_file):
+            input_file = criar_arquivo_interativo(entrada_dir, input_file_name)
         output_file_name = input("Nome do arquivo de saída (será criado na pasta Criptografado): ").strip()
-        os.makedirs("Criptografado", exist_ok=True)
-        output_file = os.path.join("Criptografado", output_file_name)
+        os.makedirs(saida_dir, exist_ok=True)
+        output_file = os.path.join(saida_dir, output_file_name)
     else:
         # DECRIPTAR: entrada da pasta Criptografado, saída na pasta Descriptografado
+        entrada_dir = "Criptografado"
+        saida_dir = "Descriptografado"
         input_file_name = input("Nome do arquivo de entrada (dentro da pasta Criptografado): ").strip()
-        input_file = os.path.join("Criptografado", input_file_name)
+        input_file = os.path.join(entrada_dir, input_file_name)
+        if not os.path.isfile(input_file):
+            input_file = criar_arquivo_interativo(entrada_dir, input_file_name)
         output_file_name = input("Nome do arquivo de saída (será criado na pasta Descriptografado): ").strip()
-        os.makedirs("Descriptografado", exist_ok=True)
-        output_file = os.path.join("Descriptografado", output_file_name)
+        os.makedirs(saida_dir, exist_ok=True)
+        output_file = os.path.join(saida_dir, output_file_name)
     
     while True:
         key_str = input("Chave (8 dígitos hexadecimais, ex: 1a2b3c4d): ").strip()
