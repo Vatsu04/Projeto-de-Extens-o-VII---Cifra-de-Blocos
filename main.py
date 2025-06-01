@@ -40,24 +40,23 @@ def derive_subkeys(key):
         subkeys.append(subkey)
     return subkeys
 
-#Pode ser aqui o erro
+# S-BOX REVERSÍVEL: soma/subtração módulo 256 (garante ciclo perfeito!)
 def sbox(byte, key_byte):
     """
-    Função S-BOX simples: substituição não linear dependente da chave
+    S-BOX simples e invertível: soma módulo 256 com o byte da chave.
     """
-    return ((byte ^ key_byte) + ((byte << 1) | (byte >> 7))) & 0xFF
+    return (byte + key_byte) & 0xFF
 
-#Pode ser aqui o erro
 def sbox_inv(byte, key_byte):
     """
-    Inversa da função S-BOX para decriptação
+    Inversa da S-BOX: subtrai o byte da chave módulo 256.
     """
-    tmp = (byte - ((byte << 1) | (byte >> 7))) & 0xFF
-    return tmp ^ key_byte
+    return (byte - key_byte) & 0xFF
 
 def substitute(block_int, subkey):
     """
-    Substituição byte a byte usando S-BOX dependente da subchave
+    Substituição byte a byte usando S-BOX dependente da subchave.
+    Divide o bloco em 4 bytes e aplica a S-BOX em cada um.
     """
     out = 0
     for i in range(4):
@@ -67,11 +66,10 @@ def substitute(block_int, subkey):
         out = (out << 8) | sb
     return out
 
-
-#Pode ser aqui o erro
 def substitute_inv(block_int, subkey):
     """
-    Inversa da substituição S-BOX
+    Inversa da substituição S-BOX.
+    Aplica a função inversa em cada byte.
     """
     out = 0
     for i in range(4):
@@ -83,8 +81,8 @@ def substitute_inv(block_int, subkey):
 
 def permute(block_int, subkey):
     """
-    Permutação dos bits dependente da subchave
-    Exemplo: embaralhamento dos nibbles (4 bits) baseado na subchave
+    Permutação dos bits dependente da subchave.
+    Embaralha os bits do bloco usando deslocamentos baseados na subchave.
     """
     positions = [(subkey >> (i*4)) & 0xF for i in range(8)]
     bits = [(block_int >> i) & 1 for i in range(32)]
@@ -98,15 +96,17 @@ def permute(block_int, subkey):
     return out
 
 def permute_inv(block_int, subkey):
+    """
+    Inversa da permutação dos bits.
+    Reverte o embaralhamento de bits da função permute.
+    ESSA É A INVERSA CORRETA!
+    """
     positions = [(subkey >> (i*4)) & 0xF for i in range(8)]
     bits = [(block_int >> i) & 1 for i in range(32)]
     unpermuted = [0]*32
     for i in range(32):
         p = (i + positions[i % 8]) % 32
-        unpermuted[i] = 0
-    for i in range(32):
-        p = (i + positions[i % 8]) % 32
-        unpermuted[p] = bits[i]
+        unpermuted[i] = bits[p]  # A inversa correta: pega o bit permutado e devolve à posição original
     out = 0
     for i in range(32):
         out |= (unpermuted[i] << i)
@@ -128,7 +128,8 @@ def decrypt_block(block_bytes, subkeys):
 
 def process_file(input_file, output_file, key, mode="encrypt"):
     """
-    Faz o processamento do arquivo inteiro em blocos de 32 bits
+    Processa o arquivo inteiro em blocos de 32 bits (4 bytes).
+    Remove padding nulo do último bloco ao descriptografar.
     """
     subkeys = derive_subkeys(key)
     processed_blocks = []
@@ -137,6 +138,9 @@ def process_file(input_file, output_file, key, mode="encrypt"):
             processed_blocks.append(encrypt_block(block, subkeys))
         else:
             processed_blocks.append(decrypt_block(block, subkeys))
+    # Se descriptografa, remove padding nulo do último bloco
+    if mode != "encrypt" and processed_blocks:
+        processed_blocks[-1] = processed_blocks[-1].rstrip(b'\x00')
     write_blocks(output_file, processed_blocks)
 
 def criar_arquivo_interativo(diretorio, nome_arquivo):
@@ -170,13 +174,14 @@ if __name__ == "__main__":
 
     if mode == "e":
         # ENCRIPTAR: entrada da pasta Descriptografado, saída na pasta Criptografado
-        entrada_dir = "Descriptografado"
+        entrada_dir = "Entrada"
         saida_dir = "Criptografado"
         input_file_name = input("Nome do arquivo de entrada (dentro da pasta Descriptografado): ").strip()
         input_file = os.path.join(entrada_dir, input_file_name)
         if not os.path.isfile(input_file):
             input_file = criar_arquivo_interativo(entrada_dir, input_file_name)
-        output_file_name = input("Nome do arquivo de saída (será criado na pasta Criptografado): ").strip()
+        # Recomenda-se usar .bin para arquivo criptografado!
+        output_file_name = input("Nome do arquivo de saída (será criado na pasta Criptografado, ex: saida.bin): ").strip()
         os.makedirs(saida_dir, exist_ok=True)
         output_file = os.path.join(saida_dir, output_file_name)
     else:
@@ -187,7 +192,8 @@ if __name__ == "__main__":
         input_file = os.path.join(entrada_dir, input_file_name)
         if not os.path.isfile(input_file):
             input_file = criar_arquivo_interativo(entrada_dir, input_file_name)
-        output_file_name = input("Nome do arquivo de saída (será criado na pasta Descriptografado): ").strip()
+        # Recomenda-se usar .txt para arquivo descriptografado!
+        output_file_name = input("Nome do arquivo de saída (será criado na pasta Descriptografado, ex: saida.txt): ").strip()
         os.makedirs(saida_dir, exist_ok=True)
         output_file = os.path.join(saida_dir, output_file_name)
     
