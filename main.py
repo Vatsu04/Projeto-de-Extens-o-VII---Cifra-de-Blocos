@@ -176,7 +176,7 @@ if __name__ == "__main__":
         # ENCRIPTAR: entrada da pasta Descriptografado, saída na pasta Criptografado
         entrada_dir = "Entrada"
         saida_dir = "Criptografado"
-        input_file_name = input("Nome do arquivo de entrada (dentro da pasta Descriptografado): ").strip()
+        input_file_name = input("Nome do arquivo de entrada (dentro da pasta Entrada: ").strip()
         input_file = os.path.join(entrada_dir, input_file_name)
         if not os.path.isfile(input_file):
             input_file = criar_arquivo_interativo(entrada_dir, input_file_name)
