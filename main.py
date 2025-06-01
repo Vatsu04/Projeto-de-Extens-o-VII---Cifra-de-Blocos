@@ -94,15 +94,15 @@ def permute(block_int, subkey):
     return out
 
 def permute_inv(block_int, subkey):
-    """
-    Inversa da permutação dos bits
-    """
     positions = [(subkey >> (i*4)) & 0xF for i in range(8)]
     bits = [(block_int >> i) & 1 for i in range(32)]
     unpermuted = [0]*32
     for i in range(32):
         p = (i + positions[i % 8]) % 32
-        unpermuted[i] = bits[p]
+        unpermuted[i] = 0
+    for i in range(32):
+        p = (i + positions[i % 8]) % 32
+        unpermuted[p] = bits[i]
     out = 0
     for i in range(32):
         out |= (unpermuted[i] << i)
