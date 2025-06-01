@@ -40,12 +40,14 @@ def derive_subkeys(key):
         subkeys.append(subkey)
     return subkeys
 
+#Pode ser aqui o erro
 def sbox(byte, key_byte):
     """
     Função S-BOX simples: substituição não linear dependente da chave
     """
     return ((byte ^ key_byte) + ((byte << 1) | (byte >> 7))) & 0xFF
 
+#Pode ser aqui o erro
 def sbox_inv(byte, key_byte):
     """
     Inversa da função S-BOX para decriptação
@@ -65,6 +67,8 @@ def substitute(block_int, subkey):
         out = (out << 8) | sb
     return out
 
+
+#Pode ser aqui o erro
 def substitute_inv(block_int, subkey):
     """
     Inversa da substituição S-BOX
