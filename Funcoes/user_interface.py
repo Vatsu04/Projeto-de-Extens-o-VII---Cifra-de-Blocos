@@ -1,5 +1,4 @@
 import os
-import sys
 from Funcoes.file_utils import (
     process_text_file_encrypt,
     process_text_file_decrypt,
@@ -18,12 +17,29 @@ def obter_chave():
         except ValueError:
             print("Chave inválida! Use 8 dígitos hexadecimais.")
 
+def criar_arquivo_menu():
+    """Permite ao usuário criar um arquivo .txt na pasta 'Entrada' pelo menu principal."""
+    entrada_dir = "Entrada"
+    nome_arquivo = input("Digite o nome do novo arquivo (exemplo: meu_arquivo.txt): ").strip()
+    if not nome_arquivo.lower().endswith('.txt'):
+        nome_arquivo += ".txt"
+    caminho = os.path.join(entrada_dir, nome_arquivo)
+    if os.path.isfile(caminho):
+        print(f"O arquivo '{caminho}' já existe.")
+        return
+    conteudo = input("Digite o conteúdo do arquivo (em uma linha ou cole o texto desejado):\n")
+    os.makedirs(entrada_dir, exist_ok=True)
+    with open(caminho, "w", encoding="utf-8") as f:
+        f.write(conteudo)
+    print(f"Arquivo '{caminho}' criado com sucesso!")
+
 def menu_principal():
     """Exibe o menu interativo e trata as escolhas do usuário."""
     while True:
         print("\n=== INN Seguros - Cifra de Blocos 32 bits ===")
         print("1. Encriptar arquivo")
         print("2. Descriptografar arquivo")
+        print("3. Criar novo arquivo .txt na pasta Entrada")
         print("0. Sair")
         opcao = input("Digite a opção desejada: ").strip()
         
@@ -62,7 +78,11 @@ def menu_principal():
             output_file = os.path.join(saida_dir, output_file_name)
             key = obter_chave()
             process_text_file_decrypt(input_file, output_file, key)
-            
+        
+        elif opcao == "3":
+            # Criar novo arquivo .txt na pasta Entrada
+            criar_arquivo_menu()
+        
         elif opcao == "0":
             print("Encerrando...")
             break
