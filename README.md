@@ -62,3 +62,7 @@ O projeto está organizado da seguinte forma:
 - O sistema foi desenvolvido para fins didáticos e não deve ser utilizado como solução de segurança para dados sensíveis em produção.
 - Recomenda-se executar sempre em ambiente seguro e controlado.
 
+- ## Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
