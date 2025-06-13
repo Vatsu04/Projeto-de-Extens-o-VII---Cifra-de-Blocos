@@ -95,24 +95,14 @@ def permute_inv(block_int, subkey):
 
 def encrypt_block(block_bytes, subkeys):
     block = int.from_bytes(block_bytes, "big")
-    print(f"  [Encrypt] Bloco inicial: {block_bytes.hex()} ({block:08x})")
     for i in range(3):
-        block_pre_sub = block
         block = substitute(block, subkeys[i])
-        print(f"    [Rodada {i+1}] Após substitute: {block:08x}")
         block = permute(block, subkeys[i])
-        print(f"    [Rodada {i+1}] Após permute   : {block:08x} (subkey: {subkeys[i]:08x})")
-    print(f"  [Encrypt] Bloco final  : {block:08x}\n")
     return block.to_bytes(4, "big")
 
 def decrypt_block(block_bytes, subkeys):
     block = int.from_bytes(block_bytes, "big")
-    print(f"  [Decrypt] Bloco inicial: {block_bytes.hex()} ({block:08x})")
-    for idx, i in enumerate(reversed(range(3))):
-        block_pre_perm = block
+    for i in reversed(range(3)):
         block = permute_inv(block, subkeys[i])
-        print(f"    [Rodada {3-idx}] Após permute_inv: {block:08x}")
         block = substitute_inv(block, subkeys[i])
-        print(f"    [Rodada {3-idx}] Após substitute_inv: {block:08x} (subkey: {subkeys[i]:08x})")
-    print(f"  [Decrypt] Bloco final  : {block:08x}\n")
     return block.to_bytes(4, "big")
