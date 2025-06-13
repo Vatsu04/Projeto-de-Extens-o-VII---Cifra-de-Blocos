@@ -94,15 +94,25 @@ def permute_inv(block_int, subkey):
     return out
 
 def encrypt_block(block_bytes, subkeys):
+    # Converte o bloco de 4 bytes para um inteiro de 32 bits (big-endian)
     block = int.from_bytes(block_bytes, "big")
+    # Realiza 3 rodadas de cifragem, cada uma utilizando uma subchave diferente
     for i in range(3):
+        # Aplica a substituição byte a byte usando a S-BOX com a subchave da rodada
         block = substitute(block, subkeys[i])
+        # Embaralha (permuta) os bits do bloco usando a mesma subchave
         block = permute(block, subkeys[i])
+    # Converte o inteiro de volta para 4 bytes (big-endian) para gravar no arquivo
     return block.to_bytes(4, "big")
 
 def decrypt_block(block_bytes, subkeys):
+    # Converte o bloco de 4 bytes para um inteiro de 32 bits (big-endian)
     block = int.from_bytes(block_bytes, "big")
+    # Realiza 3 rodadas de decifragem, na ordem inversa da criptografia
     for i in reversed(range(3)):
+        # Desfaz a permutação de bits usando a subchave da rodada
         block = permute_inv(block, subkeys[i])
+        # Desfaz a substituição byte a byte aplicando a S-BOX inversa com a subchave
         block = substitute_inv(block, subkeys[i])
+    # Converte o inteiro de volta para 4 bytes (big-endian) para gravar no arquivo
     return block.to_bytes(4, "big")
